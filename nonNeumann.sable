@@ -1,0 +1,52 @@
+Package nonneumann;
+
+Helpers
+  digito = ['0'..'9'];
+  letra = ['a'..'z'] | ['A'..'Z'];
+  espaco_em_branco = (' ' | '\t' | '\r' | '\n')+;
+  cr = 13;
+  lf = 10;
+  eol = cr lf | cr | lf;
+
+Tokens
+
+  comentario_bloco = '{-' [[0 .. 0xffff] - ['-' + '}']]* '-}';
+  comentario_linha = '#' [[0 .. 0xffff] - [cr + lf]]* eol;
+  espaco_em_branco = espaco_em_branco;
+  numero=digito+;
+  identificador = letra+;
+  soma = '+';
+  menos = '-';
+  multiplicacao = '*';
+  div = '/';
+  divisao_inteira = '//';
+  igual = '=';
+  maior_que = '>';
+  menor_que = '<';
+  operador_booleano_e = 'e';
+  operador_booleano_ou = 'ou';
+  operador_booleano_nao = 'nao';
+  operador_vinculacao = ':=';
+  ponto_final = '.';
+  parentese_esquerdo = '(';
+  parentese_direito = ')';
+  colchete_esquerdo = '[';
+  colchete_direito = ']';
+  identificador_funcao_main = '>>';
+  pipe = '|';
+  booleano_verdade = 'verdade';
+  booleano_falso = 'falso';
+  numero_real = digito+ ',' digito+;
+  numero_binario = '0b'(0|1);
+  reservada_se = 'se';
+  reservada_senao = 'senao';
+  reservada_numerica = 'numerica';
+  reservada_numerico = 'numerico';
+  reservada_booleano = 'booleano';
+  reservada_booleana = 'booleana';
+  reservada_funcao = 'funcao';
+  reservada_const = 'const';
+  reservada_lambda = 'lambda';
+
+Ignored Tokens
+   espaco_em_branco, comentario_linha, comentario_bloco;
