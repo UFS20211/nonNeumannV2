@@ -3,15 +3,15 @@ Package nonneumann;
 Helpers
   digito = ['0'..'9'];
   letra = ['a'..'z'] | ['A'..'Z'];
-  espaco_em_branco = (' ' | '\t' | '\r' | '\n')+;
+  espaco_em_branco = (' ' | 13 | 10)+;
   cr = 13;
   lf = 10;
-  eol = cr lf | cr | lf;
+  eol = cr | lf | cr lf;
 
 Tokens
 
   comentario_bloco = '{-' [[0 .. 0xffff] - ['-' + '}']]* '-}';
-  comentario_linha = '#' [[0 .. 0xffff] - [cr + lf]]* eol;
+  comentario_linha = '#' [[0 .. 0xffff] - [cr + lf]]* eol?;
   espaco_em_branco = espaco_em_branco;
   numero=digito+;
   identificador = letra+;
@@ -28,6 +28,7 @@ Tokens
   operador_booleano_nao = 'nao';
   operador_vinculacao = ':=';
   ponto_final = '.';
+  dois_pontos = ':'
   parentese_esquerdo = '(';
   parentese_direito = ')';
   colchete_esquerdo = '[';
