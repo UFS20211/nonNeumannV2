@@ -6,39 +6,23 @@ Helpers
   espaco_em_branco = (' ' | 13 | 10)+;
   cr = 13;
   lf = 10;
-  eol = cr | lf | cr lf;
+  eol = (cr | lf | cr lf);
 
 Tokens
-
-  comentario_bloco = '{-' [[0 .. 0xffff] - ['-' + '}']]* '-}';
-  comentario_linha = '#' [[0 .. 0xffff] - [cr + lf]]* eol?;
+  comentario_linha = '#' [[0 .. 0xffff] - [cr + lf]]* eol;
+  comentario_bloco = '{-' [[0 .. 0xffff] - ['-}']]* '-}';
   espaco_em_branco = espaco_em_branco;
-  numero=digito+;
-  identificador = letra+;
-  soma = '+';
-  menos = '-';
-  multiplicacao = '*';
-  div = '/';
-  divisao_inteira = '//';
-  igual = '=';
-  maior_que = '>';
-  menor_que = '<';
+
+  //Operadores lógicos
   operador_booleano_e = 'e';
   operador_booleano_ou = 'ou';
   operador_booleano_nao = 'nao';
-  operador_vinculacao = ':=';
-  ponto_final = '.';
-  dois_pontos = ':'
-  parentese_esquerdo = '(';
-  parentese_direito = ')';
-  colchete_esquerdo = '[';
-  colchete_direito = ']';
-  identificador_funcao_main = '>>';
-  pipe = '|';
+
+  //Reservados true ou falso
   booleano_verdade = 'verdade';
   booleano_falso = 'falso';
-  numero_real = digito+ ',' digito+;
-  numero_binario = '0b'(0|1);
+
+  // Reservadas da linguagem
   reservada_se = 'se';
   reservada_senao = 'senao';
   reservada_numerica = 'numerica';
@@ -48,6 +32,36 @@ Tokens
   reservada_funcao = 'funcao';
   reservada_const = 'const';
   reservada_lambda = 'lambda';
+
+  identificador = letra+;
+
+  //Operadores aritméticos
+  soma = '+';
+  menos = '-';
+  multiplicacao = '*';
+  divisao_inteira = '//';
+  div = '/';
+
+  identificador_funcao_main = '>>';
+
+  //Operadores relacionais
+  maior_que = '>';
+  menor_que = '<';
+  igual = '=';
+
+  //
+  operador_vinculacao = ':=';
+  dois_pontos = ':';
+  ponto_final = '.';
+  parentese_esquerdo = '(';
+  parentese_direito = ')';
+  colchete_esquerdo = '[';
+  colchete_direito = ']';
+  pipe = '|';
+
+  numero_binario = '0b'(0|1);
+  numero_real = digito+ ',' digito+;
+  numero=digito+;
 
 Ignored Tokens
    espaco_em_branco, comentario_linha, comentario_bloco;

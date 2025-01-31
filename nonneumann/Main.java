@@ -1,15 +1,15 @@
 package nonneumann;
 
 import nonneumann.lexer.Lexer;
+import nonneumann.node.EOF;
 import nonneumann.node.Token;
-
 import java.io.FileReader;
 import java.io.PushbackReader;
 
 public class Main {
     public static void main(String[] args) {
         try {
-            String arquivo = "/home/skywalker/Documents/education/ufs/nonNeumannLang1/nonneumann/testes/comentario.non";
+            String arquivo = "C:\\Users\\david\\IdeaProjects\\nonNeumannV2\\nonneumann\\testes\\comentario.non";
 
             Lexer lexer =
                     new Lexer(
@@ -17,7 +17,7 @@ public class Main {
                                     new FileReader(arquivo), 1024));
 
             Token token;
-            while ((token = lexer.next()) != null) {
+            while (!((token = lexer.next()) instanceof EOF)) {
                 System.out.println(token.getClass());
                 System.out.println(" ( " + token + ")");
             }
