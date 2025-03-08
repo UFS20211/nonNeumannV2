@@ -10,6 +10,7 @@ funcao booleana algumSatisfaz [funcao booleana condicao[numero] | numero valor1 
     condicao[valor1] ou condicao[valor2]
 ].
 
+
 # Função principal que verifica se 10 ou 11 é par usando a função de alta ordem
 >> funcao booleana principal [] : [
     algumSatisfaz[ehPar | 10 | 11]

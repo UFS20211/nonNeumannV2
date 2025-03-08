@@ -1,0 +1,7 @@
+funcao numerica fibonacci [] : [].
+
+
+funcao numerica retorna[numero valor] : [valor].
+
+
+>> funcao numerica princiapal[]:[retorna[7]].

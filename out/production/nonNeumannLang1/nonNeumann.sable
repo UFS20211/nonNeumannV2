@@ -13,7 +13,6 @@ Tokens
   comentario_linha = '#' [caracteres - [cr + lf]]* eol*;
   comentario_bloco = '{-' [caracteres - ['-'+'}'] ]* '-}';
   espaco_em_branco = espaco_em_branco;
-
   //Operadores lógicos
   operador_booleano_e = 'e';
   operador_booleano_ou = 'ou';
@@ -28,9 +27,9 @@ Tokens
   reservado_entao ='entao';
   reservada_senao = 'senao';
   reservada_numerica = 'numerica';
-  reservada_booleano = 'booleano';
   reservada_booleana = 'booleana';
-  tip_numero = 'numero';
+  tipo_numero = 'numero';
+  tipo_booleano = 'booleano';
   reservada_funcao = 'funcao';
   reservada_const = 'const';
   reservada_lambda = 'lambda';
@@ -51,7 +50,7 @@ Tokens
   menor_que = '<';
   igual = '=';
 
-  //
+
   operador_vinculacao = ':=';
   dois_pontos = ':';
   ponto_final = '.';
@@ -67,3 +66,55 @@ Tokens
 
 Ignored Tokens
    espaco_em_branco, comentario_linha, comentario_bloco;
+
+
+
+Productions
+
+programa =
+    {dec_funcao} dec_funcao;
+
+dec_funcao =
+    {principal} identificador_funcao_main funcao
+   |{nao_principal} funcao;
+
+funcao =
+    {funcao} reservada_funcao tipo_retorno identificador colchete_esquerdo variacao_parametros colchete_direito dois_pontos [parameter]:colchete_esquerdo expressao [parameter2]:colchete_direito ponto_final;
+
+
+tipo_retorno =
+   {numerica} reservada_numerica
+  |{booleana} reservada_booleana;
+
+variacao_parametros =
+    {parametros} parametros
+    | ;
+
+parametros =
+   {parametro} parametro
+   |{parametros} parametro pipe parametros;
+
+assinatura =
+   {assinatura} reservada_funcao tipo_retorno identificador colchete_esquerdo variacao_parametros_assinatura colchete_direito;
+
+parametro =
+   {parametro} tipo identificador
+   |{assinatura} assinatura;
+
+variacao_parametros_assinatura =
+   {parametros_assinatura} parametros_assinatura
+  | ;
+parametros_assinatura =
+    {parametro_assinatura} parametro_assinatura
+    |{parametros_assinatura} parametro_assinatura pipe parametros_assinatura;
+
+parametro_assinatura =
+   {tipo} tipo
+  |{assinatura} assinatura;
+
+tipo =
+   {numero} tipo_numero
+  |{booleano} tipo_booleano;
+
+expressao =
+ ;
