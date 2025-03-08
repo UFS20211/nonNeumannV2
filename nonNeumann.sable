@@ -7,10 +7,11 @@ Helpers
   cr = 13;
   lf = 10;
   eol = (cr | lf | cr lf);
+  caracteres = [0 .. 0xffff];
 
 Tokens
-  comentario_linha = '#' [[0 .. 0xffff] - [cr + lf]]* eol;
-  comentario_bloco = '{-' [[0 .. 0xffff] - ['-}']]* '-}';
+  comentario_linha = '#' [caracteres - [cr + lf]]* eol*;
+  comentario_bloco = '{-' [caracteres - ['-'+'}'] ]* '-}';
   espaco_em_branco = espaco_em_branco;
 
   //Operadores lógicos
@@ -24,11 +25,12 @@ Tokens
 
   // Reservadas da linguagem
   reservada_se = 'se';
+  reservado_entao ='entao';
   reservada_senao = 'senao';
   reservada_numerica = 'numerica';
-  reservada_numerico = 'numerico';
   reservada_booleano = 'booleano';
   reservada_booleana = 'booleana';
+  tip_numero = 'numero';
   reservada_funcao = 'funcao';
   reservada_const = 'const';
   reservada_lambda = 'lambda';
@@ -40,7 +42,7 @@ Tokens
   menos = '-';
   multiplicacao = '*';
   divisao_inteira = '//';
-  div = '/';
+  divisao = '/';
 
   identificador_funcao_main = '>>';
 
@@ -59,7 +61,7 @@ Tokens
   colchete_direito = ']';
   pipe = '|';
 
-  numero_binario = '0b'(0|1);
+  numero_binario = '0b'('0'|'1')+;
   numero_real = digito+ ',' digito+;
   numero=digito+;
 
