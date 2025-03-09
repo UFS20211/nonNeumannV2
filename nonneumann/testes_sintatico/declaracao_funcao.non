@@ -1,7 +1,1 @@
-funcao numerica fibonacci [] : [].
-
-
-funcao numerica retorna[numero valor] : [valor].
-
-
->> funcao numerica princiapal[]:[retorna[7]].
+funcao booleana aplicaOperador [ funcao booleana op[numero | numero] | numero x | numero y ] : [op[x | y] ].
