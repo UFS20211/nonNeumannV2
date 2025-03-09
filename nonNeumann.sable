@@ -103,7 +103,7 @@ parametro =
 
 variacao_parametros_assinatura =
    {parametros_assinatura} parametros_assinatura
-  | ;
+   | ;
 parametros_assinatura =
     {parametro_assinatura} parametro_assinatura
     |{parametros_assinatura} parametro_assinatura pipe parametros_assinatura;
@@ -114,21 +114,79 @@ parametro_assinatura =
 
 
 expressao =
-   {qualquer_numero} qualquer_numero
+   {expressao_com_precedencia} expressao_com_precedencia
+   |{bloco_expressao} bloco_expressao
+   |{chamada} chamada
+   |{lambda} lambda;
+
+expressao_com_precedencia =
+    {ou} expressao_com_precedencia operador_booleano_ou expressao_com_e
+    | {e} expressao_com_e;
+
+expressao_com_e =
+    {e} expressao_com_e operador_booleano_e expressao_com_nao
+    |{nao} expressao_com_nao;
+
+expressao_com_nao =
+    {nao} operador_booleano_nao expressao_com_nao
+    |{relacional} expressao_relacional;
+
+expressao_relacional =
+    {maior} [parameter5]:expressao_aritmetica maior_que [parameter6]:expressao_aritmetica
+   |{menor} [parameter7]:expressao_aritmetica menor_que [parameter8]:expressao_aritmetica
+   |{igual} [parameter9]:expressao_aritmetica igual [parameter10]:expressao_aritmetica
+   |{aritmetica} expressao_aritmetica;
+
+expressao_aritmetica =
+    {soma} expressao_aritmetica soma termo
+   |{subtracao} expressao_aritmetica menos termo
+   |{termo} termo;
+
+termo =
+    {mult} termo multiplicacao fator
+   |{divisao} termo divisao fator
+   |{divisao_inteira} termo divisao_inteira fator
+   |{fator} fator;
+
+fator =
+    {parenteses} parentese_esquerdo expressao parentese_direito
+   |{qualquer_numero} qualquer_numero
    |{logicos} logicos
-   |{bloco_expressao} bloco_expressao;
+   |{identificador} identificador;
 
 qualquer_numero =
      {numero_inteiro} numero
     |{numero_real} numero_real
-    |{numero_binario}  numero_binario;
+    |{numero_binario} numero_binario;
 
 logicos =
    {verdade} booleano_verdade
   |{falso} booleano_falso;
 
+chamada =
+      identificador colchete_esquerdo lista_exp colchete_direito;
+
+lambda =
+    reservada_lambda colchete_esquerdo lista_ids colchete_direito dois_pontos parentese_esquerdo expressao parentese_direito [parameter3]:colchete_esquerdo lista_exp [parameter4]:colchete_direito;
+
+lista_exp =
+    {exps} exps
+    |;
+
+exps =
+    {expressao} expressao
+    |{expressoes} expressao pipe exps;
+
+lista_ids =
+    {identificadores} identificadores
+    |;
+
+identificadores =
+    {id} identificador
+    | identificador pipe identificadores;
+
 bloco_expressao =
-    {bloco_expressao} colchete_esquerdo variacao_declaracoes_constantes colchete_direito;
+    {bloco_expressao} colchete_esquerdo variacao_declaracoes_constantes expressao colchete_direito;
 
 variacao_declaracoes_constantes =
     {declaracoes_constantes} declaracoes_constantes
