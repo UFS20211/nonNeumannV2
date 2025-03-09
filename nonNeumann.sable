@@ -7,12 +7,12 @@ Helpers
   cr = 13;
   lf = 10;
   eol = (cr | lf | cr lf);
+  caracteres = [0 .. 0xffff];
 
 Tokens
-  comentario_linha = '#' [[0 .. 0xffff] - [cr + lf]]* eol;
-  comentario_bloco = '{-' [[0 .. 0xffff] - ['-}']]* '-}';
+  comentario_linha = '#' [caracteres - [cr + lf]]* eol*;
+  comentario_bloco = '{-' [caracteres - ['-'+'}'] ]* '-}';
   espaco_em_branco = espaco_em_branco;
-
   //Operadores lógicos
   operador_booleano_e = 'e';
   operador_booleano_ou = 'ou';
@@ -24,11 +24,12 @@ Tokens
 
   // Reservadas da linguagem
   reservada_se = 'se';
+  reservado_entao ='entao';
   reservada_senao = 'senao';
   reservada_numerica = 'numerica';
-  reservada_numerico = 'numerico';
-  reservada_booleano = 'booleano';
   reservada_booleana = 'booleana';
+  tipo_numero = 'numero';
+  tipo_booleano = 'booleano';
   reservada_funcao = 'funcao';
   reservada_const = 'const';
   reservada_lambda = 'lambda';
@@ -40,7 +41,7 @@ Tokens
   menos = '-';
   multiplicacao = '*';
   divisao_inteira = '//';
-  div = '/';
+  divisao = '/';
 
   identificador_funcao_main = '>>';
 
@@ -49,7 +50,7 @@ Tokens
   menor_que = '<';
   igual = '=';
 
-  //
+
   operador_vinculacao = ':=';
   dois_pontos = ':';
   ponto_final = '.';
@@ -59,9 +60,87 @@ Tokens
   colchete_direito = ']';
   pipe = '|';
 
-  numero_binario = '0b'(0|1);
+  numero_binario = '0b'('0'|'1')+;
   numero_real = digito+ ',' digito+;
   numero=digito+;
 
 Ignored Tokens
    espaco_em_branco, comentario_linha, comentario_bloco;
+
+
+
+Productions
+
+programa =
+    {dec_funcao} dec_funcao;
+
+dec_funcao =
+    {principal} identificador_funcao_main funcao
+   |{nao_principal} funcao;
+
+funcao =
+    {funcao} reservada_funcao tipo_retorno identificador colchete_esquerdo variacao_parametros colchete_direito dois_pontos [parameter]:colchete_esquerdo expressao [parameter2]:colchete_direito ponto_final;
+
+
+tipo_retorno =
+   {numerica} reservada_numerica
+  |{booleana} reservada_booleana;
+
+variacao_parametros =
+    {parametros} parametros
+    | ;
+
+parametros =
+   {parametro} parametro
+   |{parametros} parametro pipe parametros;
+
+assinatura =
+   {assinatura} reservada_funcao tipo_retorno identificador colchete_esquerdo variacao_parametros_assinatura colchete_direito;
+
+parametro =
+   {parametro} tipo identificador
+   |{assinatura} assinatura;
+
+variacao_parametros_assinatura =
+   {parametros_assinatura} parametros_assinatura
+  | ;
+parametros_assinatura =
+    {parametro_assinatura} parametro_assinatura
+    |{parametros_assinatura} parametro_assinatura pipe parametros_assinatura;
+
+parametro_assinatura =
+   {tipo} tipo
+  |{assinatura} assinatura;
+
+
+expressao =
+   {qualquer_numero} qualquer_numero
+   |{logicos} logicos
+   |{bloco_expressao} bloco_expressao;
+
+qualquer_numero =
+     {numero_inteiro} numero
+    |{numero_real} numero_real
+    |{numero_binario}  numero_binario;
+
+logicos =
+   {verdade} booleano_verdade
+  |{falso} booleano_falso;
+
+bloco_expressao =
+    {bloco_expressao} colchete_esquerdo variacao_declaracoes_constantes colchete_direito;
+
+variacao_declaracoes_constantes =
+    {declaracoes_constantes} declaracoes_constantes
+    |;
+
+declaracoes_constantes =
+    {declaracao_constante} declaracao_constante
+    |{declaracoes_constantes} declaracao_constante declaracoes_constantes;
+
+declaracao_constante =
+   {declaracao_constante} reservada_const tipo identificador operador_vinculacao expressao ponto_final;
+
+tipo =
+   {numero} tipo_numero
+  |{booleano} tipo_booleano;
