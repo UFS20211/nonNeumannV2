@@ -10,7 +10,7 @@ import java.io.PushbackReader;
 public class Main {
     public static void main(String[] args) {
         try {
-            String arquivo = "C:\\Users\\david\\IdeaProjects\\nonNeumannV2\\nonneumann\\testes_sintatico\\declaracao_funcao.non";
+            String arquivo = "C:\\Users\\david\\IdeaProjects\\nonNeumannV2\\nonneumann\\testes\\numeroPares.non";
 
             Lexer lex = new Lexer(
                     new PushbackReader(

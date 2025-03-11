@@ -1,8 +1,10 @@
 funcao numerica areaCircunferencia [ numero raio ] : [
-    [const numero pi := 3,14.const numero pi := 3,14.]
-    lambda [valorRaio] : ( pi * valorRaio * valorRaio ) : [raio]
+    [
+        const numero pi := 3,14.const numero pi := 3,14.
+        lambda [valorRaio] : ( pi * valorRaio * valorRaio ) [raio]
+    ]
 ].
 
->> funcao numero principal [] : [
+>> funcao numerica principal [] : [
     areaCircunferencia[ 12 ]
 ].

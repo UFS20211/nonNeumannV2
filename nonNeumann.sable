@@ -11,7 +11,7 @@ Helpers
 
 Tokens
   comentario_linha = '#' [caracteres - [cr + lf]]* eol*;
-  comentario_bloco = '{-' [caracteres - ['-'+'}'] ]* '-}';
+  comentario_bloco = '{-' caracteres* '-}';
   espaco_em_branco = espaco_em_branco;
   //Operadores lógicos
   operador_booleano_e = 'e';
@@ -62,63 +62,63 @@ Tokens
 
   numero_binario = '0b'('0'|'1')+;
   numero_real = digito+ ',' digito+;
-  numero=digito+;
+  numero_inteiro=digito+;
 
 Ignored Tokens
-   espaco_em_branco, comentario_linha, comentario_bloco;
+   espaco_em_branco,
+   comentario_linha,
+   comentario_bloco;
 
 
 
 Productions
 
 programa =
-    {dec_funcao} dec_funcao;
+    {dec_funcao} dec_funcao*;
 
 dec_funcao =
-    {principal} identificador_funcao_main funcao
-   |{nao_principal} funcao;
+    {dec_funcao} identificador_funcao_main? funcao;
 
 funcao =
-    {funcao} reservada_funcao tipo_retorno identificador colchete_esquerdo variacao_parametros colchete_direito dois_pontos [parameter]:colchete_esquerdo expressao [parameter2]:colchete_direito ponto_final;
-
+    {funcao} reservada_funcao tipo_retorno identificador colchete_esquerdo parametros colchete_direito dois_pontos [parameter]:colchete_esquerdo expressao [parameter2]:colchete_direito ponto_final;
 
 tipo_retorno =
    {numerica} reservada_numerica
   |{booleana} reservada_booleana;
 
-variacao_parametros =
-    {parametros} parametros
-    | ;
-
 parametros =
-   {parametro} parametro
-   |{parametros} parametro pipe parametros;
+    {parametros} parametro fecho_parametros*
+   |{vazio};
+
+fecho_parametros =
+    {fecho_parametros} pipe parametro;
 
 assinatura =
-   {assinatura} reservada_funcao tipo_retorno identificador colchete_esquerdo variacao_parametros_assinatura colchete_direito;
+   {assinatura} reservada_funcao tipo_retorno identificador colchete_esquerdo parametros_assinatura colchete_direito;
 
 parametro =
    {parametro} tipo identificador
    |{assinatura} assinatura;
 
-variacao_parametros_assinatura =
-   {parametros_assinatura} parametros_assinatura
-   | ;
 parametros_assinatura =
-    {parametro_assinatura} parametro_assinatura
-    |{parametros_assinatura} parametro_assinatura pipe parametros_assinatura;
+    {parametros_assinatura} parametro_assinatura fecho_parametro_assinatura*
+    |{vazio};
+
+fecho_parametro_assinatura =
+    {fecho_parametro_assinatura} pipe parametro_assinatura*;
 
 parametro_assinatura =
    {tipo} tipo
   |{assinatura} assinatura;
 
-
 expressao =
-   {expressao_com_precedencia} expressao_com_precedencia
-   |{bloco_expressao} bloco_expressao
-   |{chamada} chamada
-   |{lambda} lambda
-   |{condicional}
+    {expressao_com_precedencia} expressao_com_precedencia
+    |{bloco_expressao} bloco_expressao
+    |{menos_exp} menos expressao
+    |{condicao} condicao;
+
+condicao =
+    {condicao} reservada_se parentese_esquerdo expressao parentese_direito reservado_entao [parameter]:expressao reservada_senao [parameter2]:expressao;
 
 expressao_com_precedencia =
     {ou} expressao_com_precedencia operador_booleano_ou expressao_com_e
@@ -151,12 +151,14 @@ termo =
 
 fator =
     {parenteses} parentese_esquerdo expressao parentese_direito
-   |{qualquer_numero} qualquer_numero
+   |{qualquer_numero} numeros
    |{logicos} logicos
-   |{identificador} identificador;
+   |{identificador} identificador
+   |{chamada} chamada
+   |{lambda} lambda;
 
-qualquer_numero =
-     {numero_inteiro} numero
+numeros =
+     {numero_inteiro} numero_inteiro
     |{numero_real} numero_real
     |{numero_binario} numero_binario;
 
@@ -171,31 +173,25 @@ lambda =
     reservada_lambda colchete_esquerdo lista_ids colchete_direito dois_pontos parentese_esquerdo expressao parentese_direito [parameter3]:colchete_esquerdo lista_exp [parameter4]:colchete_direito;
 
 lista_exp =
-    {exps} exps
+    {lista_exp} expressao fecho_expressao*
     |;
 
-exps =
-    {expressao} expressao
-    |{expressoes} expressao pipe exps;
+fecho_expressao =
+    {fecho_expressao} pipe expressao;
 
 lista_ids =
-    {identificadores} identificadores
+    {lista_ids} identificador fecho_identificador*
     |;
 
-identificadores =
-    {id} identificador
-    | identificador pipe identificadores;
+fecho_identificador =
+  {fecho_identificador} pipe identificador;
 
 bloco_expressao =
-    {bloco_expressao} colchete_esquerdo variacao_declaracoes_constantes expressao colchete_direito;
-
-variacao_declaracoes_constantes =
-    {declaracoes_constantes} declaracoes_constantes
-    |;
+    {bloco_expressao} colchete_esquerdo declaracoes_constantes expressao colchete_direito;
 
 declaracoes_constantes =
-    {declaracao_constante} declaracao_constante
-    |{declaracoes_constantes} declaracao_constante declaracoes_constantes;
+    {declaracao_constante} [parameter]:declaracao_constante declaracao_constante*
+    |{vazio};
 
 declaracao_constante =
    {declaracao_constante} reservada_const tipo identificador operador_vinculacao expressao ponto_final;
