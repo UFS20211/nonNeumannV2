@@ -112,17 +112,9 @@ parametro_assinatura =
   |{assinatura} assinatura;
 
 expressao =
-    {expressao_com_precedencia} expressao_com_precedencia
-    |{bloco_expressao} bloco_expressao
-    |{menos_exp} menos expressao
-    |{condicao} condicao;
-
-condicao =
-    {condicao} reservada_se parentese_esquerdo expressao parentese_direito reservado_entao [parameter]:expressao reservada_senao [parameter2]:expressao;
-
-expressao_com_precedencia =
-    {ou} expressao_com_precedencia operador_booleano_ou expressao_com_e
+    {ou} expressao operador_booleano_ou expressao_com_e
     | {e} expressao_com_e;
+
 
 expressao_com_e =
     {e} expressao_com_e operador_booleano_e expressao_com_nao
@@ -155,7 +147,11 @@ fator =
    |{logicos} logicos
    |{identificador} identificador
    |{chamada} chamada
-   |{lambda} lambda;
+   |{lambda} lambda
+   |{bloco_expressao} bloco_expressao
+   |{menos_exp} menos fator;
+
+// |{condicao} condicao Verificar onde colocar
 
 numeros =
      {numero_inteiro} numero_inteiro
@@ -199,3 +195,6 @@ declaracao_constante =
 tipo =
    {numero} tipo_numero
   |{booleano} tipo_booleano;
+
+condicao =
+    {condicao} reservada_se parentese_esquerdo expressao parentese_direito reservado_entao [parameter]:expressao reservada_senao [parameter2]:expressao;

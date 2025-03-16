@@ -6,8 +6,8 @@ funcao booleana ehPar [numero valor] : [
 ].
 
 # Função de alta ordem que verifica se algum numero satisfaz uma condição
-funcao booleana algumSatisfaz [funcao booleana condicao[numero] | numero valor1 | numero valor2] : [
-    condicao[valor1] ou condicao[valor2]
+funcao booleana algumSatisfaz [funcao booleana condicao[numero] | numero valorUm | numero valorDois] : [
+    condicao[valorUm] ou condicao[valorDois]
 ].
 
 
