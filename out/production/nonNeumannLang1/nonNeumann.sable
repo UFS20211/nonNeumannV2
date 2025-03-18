@@ -105,16 +105,19 @@ parametros_assinatura =
     |{vazio};
 
 fecho_parametro_assinatura =
-    {fecho_parametro_assinatura} pipe parametro_assinatura*;
+    {fecho_parametro_assinatura} pipe parametro_assinatura;
 
 parametro_assinatura =
    {tipo} tipo
   |{assinatura} assinatura;
 
 expressao =
-    {ou} expressao operador_booleano_ou expressao_com_e
-    | {e} expressao_com_e;
+    {expressao_com_precedencia} expressao_com_precedencia
+   |{condicao} condicao;
 
+expressao_com_precedencia =
+    {ou} expressao_com_precedencia operador_booleano_ou expressao_com_e
+    | {e} expressao_com_e;
 
 expressao_com_e =
     {e} expressao_com_e operador_booleano_e expressao_com_nao
@@ -143,15 +146,13 @@ termo =
 
 fator =
     {parenteses} parentese_esquerdo expressao parentese_direito
-   |{qualquer_numero} numeros
+   |{numeros} numeros
    |{logicos} logicos
    |{identificador} identificador
    |{chamada} chamada
    |{lambda} lambda
    |{bloco_expressao} bloco_expressao
    |{menos_exp} menos fator;
-
-// |{condicao} condicao Verificar onde colocar
 
 numeros =
      {numero_inteiro} numero_inteiro
@@ -170,24 +171,20 @@ lambda =
 
 lista_exp =
     {lista_exp} expressao fecho_expressao*
-    |;
+   |{vazio};
 
 fecho_expressao =
     {fecho_expressao} pipe expressao;
 
 lista_ids =
     {lista_ids} identificador fecho_identificador*
-    |;
+   |{vazio};
 
 fecho_identificador =
   {fecho_identificador} pipe identificador;
 
 bloco_expressao =
-    {bloco_expressao} colchete_esquerdo declaracoes_constantes expressao colchete_direito;
-
-declaracoes_constantes =
-    {declaracao_constante} [parameter]:declaracao_constante declaracao_constante*
-    |{vazio};
+    {bloco_expressao} colchete_esquerdo declaracao_constante* expressao colchete_direito;
 
 declaracao_constante =
    {declaracao_constante} reservada_const tipo identificador operador_vinculacao expressao ponto_final;

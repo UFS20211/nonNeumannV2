@@ -1,5 +1,5 @@
 funcao numerica condicional [numero x | numero y] : [
-  -(3+2)
+    (se (x > y) entao x senao y ) + (se (x > y) entao y senao x)
 ].
 
 
