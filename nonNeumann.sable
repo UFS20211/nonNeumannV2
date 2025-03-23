@@ -73,22 +73,22 @@ Ignored Tokens
 
 Productions
 
-programa =
-    {dec_funcao} dec_funcao*;
+programa { -> programa } =
+    {dec_funcao} dec_funcao* {-> [dec_funcao]};
 
-dec_funcao =
-    {dec_funcao} identificador_funcao_main? funcao;
+dec_funcao { -> dec_funcao} =
+    {dec_funcao} identificador_funcao_main? funcao {-> funcao};
 
-funcao =
-    {funcao} reservada_funcao tipo_retorno identificador colchete_esquerdo parametros colchete_direito dois_pontos [parameter]:colchete_esquerdo expressao [parameter2]:colchete_direito ponto_final;
+funcao { -> a_funcao} =
+    {funcao} reservada_funcao tipo_retorno identificador colchete_esquerdo parametros* colchete_direito dois_pontos [parameter]:colchete_esquerdo expressao [parameter2]:colchete_direito ponto_final
+    {-> New a_funcao.ar_funcao(tipo_retorno, identificador, [parametros.a_parametros], expressao)};
 
-tipo_retorno =
-   {numerica} reservada_numerica
-  |{booleana} reservada_booleana;
+tipo_retorno { -> a_tipo_retorno} =
+   {numerica} reservada_numerica {-> New tipo_retorno.reservada_numerica(reservada_numerica)}
+  |{booleana} reservada_booleana {-> New tipo_retorno.reservada_booleana(reservada_booleana)};
 
-parametros =
-    {parametros} parametro fecho_parametros*
-   |{vazio};
+parametros {a_parametros} =
+    {parametros} parametro fecho_parametros* ;
 
 fecho_parametros =
     {fecho_parametros} pipe parametro;
@@ -195,3 +195,36 @@ tipo =
 
 condicao =
     {condicao} reservada_se parentese_esquerdo expressao parentese_direito reservado_entao [parameter]:expressao reservada_senao [parameter2]:expressao;
+
+
+
+Abstract Syntax Tree
+
+a_programa =
+    {ar_dec_funcao} dec_funcao*;
+
+a_dec_funcao =
+    {ar_dec_funcao} a_funcao;
+
+a_funcao =
+    {ar_funcao} tipo_retorno identificador parametros expressao;
+
+a_tipo =
+    {ar_numero} tipo_numero
+   |{ar_booleano} tipo_booleano;
+
+a_tipo_retorno =
+    {ar_numerica} reservada_numerica
+  | {ar_booleana} reservada_booleana;
+
+a_parametros =
+    {ar_parametros} parametro*
+  | {ar_vazio};
+
+a_parametro =
+    {ar_parametro} tipo identificador
+  | {ar_assinatura} assinatura;
+
+a_assinatura =
+    {ar_assinatura} tipo_retorno identificador parametros;
+
