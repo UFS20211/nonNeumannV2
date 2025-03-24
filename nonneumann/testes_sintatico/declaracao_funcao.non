@@ -1,4 +1,1 @@
-funcao booleana max [numero x | numero y] :
-    [
-        se ( x > y ) entao x senao y
-    ].
+funcao booleana aplicaOperador [ funcao booleana op[booleano | numero] | booleano x | numero y ] : [op[x | y] ].

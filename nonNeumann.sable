@@ -73,43 +73,47 @@ Ignored Tokens
 
 Productions
 
-programa { -> programa } =
-    {dec_funcao} dec_funcao* {-> [dec_funcao]};
+programa { -> a_programa } =
+    {dec_funcao} dec_funcao* {-> New a_programa.ar_programa([dec_funcao.a_dec_funcao])};
 
-dec_funcao { -> dec_funcao} =
-    {dec_funcao} identificador_funcao_main? funcao {-> funcao};
+dec_funcao { -> a_dec_funcao} =
+    {dec_funcao} identificador_funcao_main? funcao {-> New a_dec_funcao.ar_dec_funcao(funcao.a_funcao)};
 
 funcao { -> a_funcao} =
-    {funcao} reservada_funcao tipo_retorno identificador colchete_esquerdo parametros* colchete_direito dois_pontos [parameter]:colchete_esquerdo expressao [parameter2]:colchete_direito ponto_final
-    {-> New a_funcao.ar_funcao(tipo_retorno, identificador, [parametros.a_parametros], expressao)};
+    {funcao} reservada_funcao [retorno]:tipo_retorno [nome]:identificador colchete_esquerdo [args]:parametros colchete_direito dois_pontos [parameter]:colchete_esquerdo [expr]:expressao [parameter2]:colchete_direito ponto_final
+    {-> New a_funcao.ar_funcao(retorno.a_tipo_retorno, nome, args.a_parametros)};
 
 tipo_retorno { -> a_tipo_retorno} =
-   {numerica} reservada_numerica {-> New tipo_retorno.reservada_numerica(reservada_numerica)}
-  |{booleana} reservada_booleana {-> New tipo_retorno.reservada_booleana(reservada_booleana)};
+   {numerica} reservada_numerica {-> New a_tipo_retorno.ar_reservada_numerica(reservada_numerica)}
+  |{booleana} reservada_booleana {-> New a_tipo_retorno.ar_reservada_booleana(reservada_booleana)};
 
-parametros {a_parametros} =
-    {parametros} parametro fecho_parametros* ;
+parametros { -> a_parametros} =
+      {parametros} parametro outro_parametro* {-> New a_parametros.ar_parametros([parametro.a_parametro, outro_parametro.a_parametro])}
+     |{vazio} { -> New a_parametros.ar_parametros([])};
 
-fecho_parametros =
-    {fecho_parametros} pipe parametro;
+assinatura {-> a_assinatura}  =
+  {assinatura} reservada_funcao [retorno]:tipo_retorno [nome]:identificador colchete_esquerdo [assinaturas]:parametros_assinatura colchete_direito
+  {-> New a_assinatura.ar_assinatura(retorno.a_tipo_retorno,nome,assinaturas.a_parametros_assinatura)};
 
-assinatura =
-   {assinatura} reservada_funcao tipo_retorno identificador colchete_esquerdo parametros_assinatura colchete_direito;
+outro_parametro { -> a_parametro } =
+  {outro_parametro} pipe parametro {-> parametro.a_parametro };
 
-parametro =
-   {parametro} tipo identificador
-   |{assinatura} assinatura;
+parametro { -> a_parametro} =
+   {parametro} [tipo_esq]:tipo identificador {-> New a_parametro.ar_parametro(tipo_esq.a_tipo, identificador) }
+  |{assinatura} [assinatura]:assinatura {-> New a_parametro.ar_assinatura(assinatura.a_assinatura)};
 
-parametros_assinatura =
+
+parametros_assinatura { -> a_parametros_assinatura} =
     {parametros_assinatura} parametro_assinatura fecho_parametro_assinatura*
-    |{vazio};
+    {-> New a_parametros_assinatura.ar_parametros_assinatura([parametro_assinatura.a_parametro_assinatura, fecho_parametro_assinatura.a_parametro_assinatura])}
+    |{vazio} { -> New a_parametros_assinatura.ar_parametros_assinatura([])};
 
-fecho_parametro_assinatura =
-    {fecho_parametro_assinatura} pipe parametro_assinatura;
+fecho_parametro_assinatura { -> a_parametro_assinatura} =
+    {fecho_parametro_assinatura} pipe parametro_assinatura {-> parametro_assinatura.a_parametro_assinatura};
 
-parametro_assinatura =
-   {tipo} tipo
-  |{assinatura} assinatura;
+parametro_assinatura { -> a_parametro_assinatura} =
+    {tipo} [tipo]:tipo { -> New a_parametro_assinatura.ar_tipo(tipo.a_tipo) }
+   |{assinatura} [assinatura]:assinatura { -> New a_parametro_assinatura.ar_assinatura(assinatura.a_assinatura)};
 
 expressao =
     {expressao_com_precedencia} expressao_com_precedencia
@@ -189,9 +193,9 @@ bloco_expressao =
 declaracao_constante =
    {declaracao_constante} reservada_const tipo identificador operador_vinculacao expressao ponto_final;
 
-tipo =
-   {numero} tipo_numero
-  |{booleano} tipo_booleano;
+tipo {-> a_tipo} =
+   {numero} tipo_numero {-> New a_tipo.ar_tipo_numero(tipo_numero)}
+  |{booleano} tipo_booleano {-> New a_tipo.ar_tipo_booleano(tipo_booleano)};
 
 condicao =
     {condicao} reservada_se parentese_esquerdo expressao parentese_direito reservado_entao [parameter]:expressao reservada_senao [parameter2]:expressao;
@@ -201,30 +205,35 @@ condicao =
 Abstract Syntax Tree
 
 a_programa =
-    {ar_dec_funcao} dec_funcao*;
+    {ar_programa} a_dec_funcao*;
 
 a_dec_funcao =
     {ar_dec_funcao} a_funcao;
 
 a_funcao =
-    {ar_funcao} tipo_retorno identificador parametros expressao;
+    {ar_funcao} [retorno]:a_tipo_retorno [nome]:identificador [args]:a_parametros;
 
 a_tipo =
-    {ar_numero} tipo_numero
-   |{ar_booleano} tipo_booleano;
+    {ar_tipo_numero} tipo_numero
+   |{ar_tipo_booleano} tipo_booleano;
 
 a_tipo_retorno =
-    {ar_numerica} reservada_numerica
-  | {ar_booleana} reservada_booleana;
+    {ar_reservada_numerica} reservada_numerica
+  | {ar_reservada_booleana} reservada_booleana;
 
 a_parametros =
-    {ar_parametros} parametro*
-  | {ar_vazio};
+    {ar_parametros} a_parametro*;
 
 a_parametro =
-    {ar_parametro} tipo identificador
-  | {ar_assinatura} assinatura;
+    {ar_parametro} a_tipo identificador
+   |{ar_assinatura} a_assinatura;
 
 a_assinatura =
-    {ar_assinatura} tipo_retorno identificador parametros;
+  {ar_assinatura} a_tipo_retorno identificador a_parametros_assinatura;
 
+a_parametros_assinatura =
+    {ar_parametros_assinatura} a_parametro_assinatura*;
+
+a_parametro_assinatura =
+    {ar_tipo} a_tipo
+   |{ar_assinatura} a_assinatura;
