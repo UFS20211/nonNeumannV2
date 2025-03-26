@@ -115,40 +115,51 @@ parametro_assinatura { -> a_parametro_assinatura} =
     {tipo} [tipo]:tipo { -> New a_parametro_assinatura.ar_tipo(tipo.a_tipo) }
    |{assinatura} [assinatura]:assinatura { -> New a_parametro_assinatura.ar_assinatura(assinatura.a_assinatura)};
 
-expressao =
-    {expressao_com_precedencia} expressao_com_precedencia
-   |{condicao} condicao;
+expressao {-> a_expressao} =
+    {expressao_com_precedencia} expressao_com_precedencia { -> expressao_com_precedencia.a_expressao }
+   |{condicao} [cond]:condicao {-> New a_expressao.ar_condicao(cond.a_condicao)};
 
-expressao_com_precedencia =
-    {ou} expressao_com_precedencia operador_booleano_ou expressao_com_e
-    | {e} expressao_com_e;
+expressao_com_precedencia {-> a_expressao} =
+    {ou} [left]:expressao_com_precedencia operador_booleano_ou [right]:expressao_com_e
+        { -> New a_expressao.ar_logico_ou(left.a_expressao, right.a_expressao)}
+    | {e} expressao_com_e { -> expressao_com_e.a_expressao};
 
-expressao_com_e =
-    {e} expressao_com_e operador_booleano_e expressao_com_nao
-    |{nao} expressao_com_nao;
+expressao_com_e { -> a_expressao} =
+    {e} [left]:expressao_com_e operador_booleano_e [right]:expressao_com_nao
+    { -> New a_expressao.ar_logico_e(left.a_expressao, right.a_expressao)}
+    |{nao} expressao_com_nao { -> expressao_com_nao.a_expressao };
 
-expressao_com_nao =
-    {nao} operador_booleano_nao expressao_com_nao
-    |{relacional} expressao_relacional;
+expressao_com_nao { -> a_expressao} =
+    {nao} operador_booleano_nao [expr]:expressao_com_nao
+    { -> New a_expressao.ar_logico_nao(expr.a_expressao) }
+    |{relacional} expressao_relacional { -> expressao_relacional.a_expressao };
 
-expressao_relacional =
-    {maior} [parameter5]:expressao_aritmetica maior_que [parameter6]:expressao_aritmetica
-   |{menor} [parameter7]:expressao_aritmetica menor_que [parameter8]:expressao_aritmetica
-   |{igual} [parameter9]:expressao_aritmetica igual [parameter10]:expressao_aritmetica
-   |{aritmetica} expressao_aritmetica;
+expressao_relacional { -> a_expressao} =
+    {maior} [left]:expressao_aritmetica maior_que [right]:expressao_aritmetica
+    {-> New a_expressao.ar_rel_maior(left.a_expressao, right.a_expressao) }
+   |{menor} [left]:expressao_aritmetica menor_que [right]:expressao_aritmetica
+    {-> New a_expressao.ar_rel_menor(left.a_expressao, right.a_expressao)}
+   |{igual} [left]:expressao_aritmetica igual [right]:expressao_aritmetica
+    {-> New a_expressao.ar_rel_igual(left.a_expressao, right.a_expressao) }
+   |{aritmetica} expressao_aritmetica { -> expressao_aritmetica.a_expressao };
 
-expressao_aritmetica =
-    {soma} expressao_aritmetica soma termo
-   |{subtracao} expressao_aritmetica menos termo
-   |{termo} termo;
+expressao_aritmetica { -> a_expressao} =
+    {soma} [left]:expressao_aritmetica soma [right]:termo
+    {-> New a_expressao.ar_arit_soma(left.a_expressao, right.a_expressao) }
+   |{subtracao} [left]:expressao_aritmetica menos [right]:termo
+   {-> New a_expressao.ar_arit_sub(left.a_expressao, right.a_expressao)}
+   |{termo} termo { -> termo.a_expressao};
 
-termo =
-    {mult} termo multiplicacao fator
-   |{divisao} termo divisao fator
-   |{divisao_inteira} termo divisao_inteira fator
-   |{fator} fator;
+termo { -> a_expressao} =
+    {mult} [left]:termo multiplicacao [right]:fator
+    {-> New a_expressao.ar_arit_mult(left.a_expressao, right.a_expressao)}
+   |{divisao} [left]:termo divisao [right]:fator
+   {-> New a_expressao.ar_arit_div(left.a_expressao, right.a_expressao)}
+   |{divisao_inteira} [left]:termo divisao_inteira [right]:fator
+   {-> New a_expressao.ar_arit_div_int(left.a_expressao, right.a_expressao)}
+   |{fator} fator {-> fator.};
 
-fator =
+fator { -> a_expressao}=
     {parenteses} parentese_esquerdo expressao parentese_direito
    |{numeros} numeros
    |{logicos} logicos
@@ -197,8 +208,9 @@ tipo {-> a_tipo} =
    {numero} tipo_numero {-> New a_tipo.ar_tipo_numero(tipo_numero)}
   |{booleano} tipo_booleano {-> New a_tipo.ar_tipo_booleano(tipo_booleano)};
 
-condicao =
-    {condicao} reservada_se parentese_esquerdo expressao parentese_direito reservado_entao [parameter]:expressao reservada_senao [parameter2]:expressao;
+condicao { -> a_expressao} =
+    {condicao} reservada_se parentese_esquerdo [cond]:expressao parentese_direito reservado_entao [entao]:expressao reservada_senao [senao]:expressao
+    { -> New a_expressao.ar_condicao(cond.a_expressao, entao.a_expressao, senao.a_expressao)};
 
 
 
@@ -237,3 +249,26 @@ a_parametros_assinatura =
 a_parametro_assinatura =
     {ar_tipo} a_tipo
    |{ar_assinatura} a_assinatura;
+
+a_expressao =
+        {ar_condicao} a_condicao
+      | {ar_logico_ou} expressao expressao
+      | {ar_logico_e} expressao expressao
+      | {ar_logico_nao} expressao
+      | {ar_rel_maior} expressao expressao
+      | {ar_rel_menor} expressao expressao
+      | {ar_rel_igual} expressao expressao
+      | {ar_arit_soma} expressao expressao
+      | {ar_arit_sub} expressao expressao
+      | {ar_arit_mult} expressao expressao
+      | {ar_arit_div} expressao expressao
+      | {ar_arit_div_int} expressao expressao
+      | {ar_numero_inteiro} numero_inteiro
+      | {ar_numero_real} numero_real
+      | {ar_numero_binario} numero_binario
+      | {ar_bool_verdade} booleano_verdade
+      | {ar_bool_falso} booleano_falso
+      | {ar_identificador} identificador
+
+a_condicao =
+    {ar_condicao} [cond]:a_expressao [entao]:a_expressao [senao]:a_expressao
