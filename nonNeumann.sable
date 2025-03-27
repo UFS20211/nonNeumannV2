@@ -81,7 +81,7 @@ dec_funcao { -> a_dec_funcao} =
 
 funcao { -> a_funcao} =
     {funcao} reservada_funcao [retorno]:tipo_retorno [nome]:identificador colchete_esquerdo [args]:parametros colchete_direito dois_pontos [parameter]:colchete_esquerdo [expr]:expressao [parameter2]:colchete_direito ponto_final
-    {-> New a_funcao.ar_funcao(retorno.a_tipo_retorno, nome, args.a_parametros)};
+    {-> New a_funcao.ar_funcao(retorno.a_tipo_retorno, nome, args.a_parametros, expr.a_expressao)};
 
 tipo_retorno { -> a_tipo_retorno} =
    {numerica} reservada_numerica {-> New a_tipo_retorno.ar_reservada_numerica(reservada_numerica)}
@@ -157,61 +157,67 @@ termo { -> a_expressao} =
    {-> New a_expressao.ar_arit_div(left.a_expressao, right.a_expressao)}
    |{divisao_inteira} [left]:termo divisao_inteira [right]:fator
    {-> New a_expressao.ar_arit_div_int(left.a_expressao, right.a_expressao)}
-   |{fator} fator {-> fator.};
+   |{fator} fator {-> fator.a_expressao};
 
-fator { -> a_expressao}=
-    {parenteses} parentese_esquerdo expressao parentese_direito
-   |{numeros} numeros
-   |{logicos} logicos
-   |{identificador} identificador
-   |{chamada} chamada
-   |{lambda} lambda
-   |{bloco_expressao} bloco_expressao
-   |{menos_exp} menos fator;
+fator { -> a_expressao }=
+    {parenteses} parentese_esquerdo [expr]:expressao parentese_direito { -> expr.a_expressao }
+   |{numeros} numeros { -> numeros.a_expressao}
+   |{logicos} logicos { -> logicos.a_expressao}
+   |{identificador} [nome]:identificador { -> New a_expressao.ar_identificador(nome)}
+   |{chamada} chamada {-> New a_expressao.ar_chamada(chamada.a_chamada)}
+   |{lambda} lambda { -> New a_expressao.ar_lambda(lambda.a_lambda)}
+   |{bloco_expressao} bloco_expressao { -> New a_expressao.ar_bloco_expressao(bloco_expressao.a_bloco_expressao)}
+   |{menos_exp} menos fator { -> New a_expressao.ar_menos_exp(menos, fator.a_expressao)};
 
-numeros =
-     {numero_inteiro} numero_inteiro
-    |{numero_real} numero_real
-    |{numero_binario} numero_binario;
+numeros { -> a_expressao } =
+     {numero_inteiro} numero_inteiro { -> New a_expressao.ar_numero_inteiro(numero_inteiro)}
+    |{numero_real} numero_real { -> New a_expressao.ar_numero_real(numero_real)}
+    |{numero_binario} numero_binario { -> New a_expressao.ar_numero_binario(numero_binario)};
 
-logicos =
-   {verdade} booleano_verdade
-  |{falso} booleano_falso;
+logicos { -> a_expressao } =
+   {verdade} booleano_verdade { -> New a_expressao.ar_booleano_verdade(booleano_verdade)}
+  |{falso} booleano_falso { -> New a_expressao.ar_booleano_falso(booleano_falso)};
 
-chamada =
-      identificador colchete_esquerdo lista_exp colchete_direito;
+chamada { -> a_chamada} =
+    {ar_chamada}  [nome]:identificador colchete_esquerdo [exprs]:lista_exp colchete_direito
+    { -> New a_chamada.ar_chamada(nome,exprs.a_lista_expr)};
 
-lambda =
-    reservada_lambda colchete_esquerdo lista_ids colchete_direito dois_pontos parentese_esquerdo expressao parentese_direito [parameter3]:colchete_esquerdo lista_exp [parameter4]:colchete_direito;
+lambda { -> a_lambda } =
+    reservada_lambda colchete_esquerdo [ls_ids]:lista_ids colchete_direito dois_pontos parentese_esquerdo [expr]:expressao parentese_direito [parameter3]:colchete_esquerdo [ls_exp]:lista_exp [parameter4]:colchete_direito
+    { -> New a_lambda.ar_lambda(ls_ids.a_lista_ids, expr.a_expressao, ls_exp.a_lista_expr)};
 
-lista_exp =
+lista_exp { -> a_lista_expr} =
     {lista_exp} expressao fecho_expressao*
-   |{vazio};
+    { -> New a_lista_expr.ar_lista_expr([expressao.a_expressao, fecho_expressao.a_expressao])}
+   |{vazio} { -> New a_lista_expr.ar_lista_expr([])};
 
-fecho_expressao =
-    {fecho_expressao} pipe expressao;
+fecho_expressao { -> a_expressao } =
+    {fecho_expressao} pipe [expr]:expressao {-> expr.a_expressao };
 
-lista_ids =
-    {lista_ids} identificador fecho_identificador*
-   |{vazio};
+lista_ids { -> a_lista_ids} =
+    {lista_ids} [prod]:prod_identificador [resto]:fecho_identificador*
+    { -> New a_lista_ids.ar_lista_ids([identificador, resto.a_lista_ids])}
+    |{vazio} { -> New a_lista_ids.ar_lista_ids([])};
 
-fecho_identificador =
-  {fecho_identificador} pipe identificador;
 
-bloco_expressao =
-    {bloco_expressao} colchete_esquerdo declaracao_constante* expressao colchete_direito;
+fecho_identificador { -> a_lista_ids }  =
+  {fecho_identificador} pipe identificador { -> New a_lista_ids.ar_lista_ids([identificador])};
 
-declaracao_constante =
-   {declaracao_constante} reservada_const tipo identificador operador_vinculacao expressao ponto_final;
+bloco_expressao { -> a_bloco_expressao } =
+    {bloco_expressao} colchete_esquerdo [decl_con]:declaracao_constante* [expr]:expressao colchete_direito
+    { -> New a_bloco_expressao.ar_bloco_expressao([decl_con.a_declaracao_constante], expr.a_expressao)};
+
+declaracao_constante { -> a_declaracao_constante } =
+   {declaracao_constante} reservada_const [tipo]:tipo [nome]:identificador operador_vinculacao [expr]:expressao ponto_final
+   { -> New a_declaracao_constante.ar_declaracao_constante(tipo.a_tipo, nome, expr.a_expressao)};
 
 tipo {-> a_tipo} =
    {numero} tipo_numero {-> New a_tipo.ar_tipo_numero(tipo_numero)}
   |{booleano} tipo_booleano {-> New a_tipo.ar_tipo_booleano(tipo_booleano)};
 
-condicao { -> a_expressao} =
+condicao { -> a_condicao} =
     {condicao} reservada_se parentese_esquerdo [cond]:expressao parentese_direito reservado_entao [entao]:expressao reservada_senao [senao]:expressao
-    { -> New a_expressao.ar_condicao(cond.a_expressao, entao.a_expressao, senao.a_expressao)};
-
+    { -> New a_condicao.ar_condicao(cond.a_expressao, entao.a_expressao, senao.a_expressao)};
 
 
 Abstract Syntax Tree
@@ -223,7 +229,7 @@ a_dec_funcao =
     {ar_dec_funcao} a_funcao;
 
 a_funcao =
-    {ar_funcao} [retorno]:a_tipo_retorno [nome]:identificador [args]:a_parametros;
+    {ar_funcao} [retorno]:a_tipo_retorno [nome]:identificador [args]:a_parametros [expr]:a_expressao;
 
 a_tipo =
     {ar_tipo_numero} tipo_numero
@@ -252,23 +258,46 @@ a_parametro_assinatura =
 
 a_expressao =
         {ar_condicao} a_condicao
-      | {ar_logico_ou} expressao expressao
-      | {ar_logico_e} expressao expressao
-      | {ar_logico_nao} expressao
-      | {ar_rel_maior} expressao expressao
-      | {ar_rel_menor} expressao expressao
-      | {ar_rel_igual} expressao expressao
-      | {ar_arit_soma} expressao expressao
-      | {ar_arit_sub} expressao expressao
-      | {ar_arit_mult} expressao expressao
-      | {ar_arit_div} expressao expressao
-      | {ar_arit_div_int} expressao expressao
+      | {ar_chamada} a_chamada
+      | {ar_lambda} a_lambda
+      | {ar_menos_exp} menos a_expressao
+      | {ar_bloco_expressao} a_bloco_expressao
+      | {ar_logico_ou} [left]:a_expressao [right]:a_expressao
+      | {ar_logico_e} [left]:a_expressao [right]:a_expressao
+      | {ar_logico_nao} a_expressao
+      | {ar_rel_maior} [left]:a_expressao [right]:a_expressao
+      | {ar_rel_menor} [left]:a_expressao [right]:a_expressao
+      | {ar_rel_igual} [left]:a_expressao [right]:a_expressao
+      | {ar_arit_soma} [left]:a_expressao [right]:a_expressao
+      | {ar_arit_sub} [left]:a_expressao [right]:a_expressao
+      | {ar_arit_mult} [left]:a_expressao [right]:a_expressao
+      | {ar_arit_div} [left]:a_expressao [right]:a_expressao
+      | {ar_arit_div_int} [left]:a_expressao [right]:a_expressao
       | {ar_numero_inteiro} numero_inteiro
       | {ar_numero_real} numero_real
       | {ar_numero_binario} numero_binario
-      | {ar_bool_verdade} booleano_verdade
-      | {ar_bool_falso} booleano_falso
-      | {ar_identificador} identificador
+      | {ar_booleano_verdade} booleano_verdade
+      | {ar_booleano_falso} booleano_falso
+      | {ar_identificador} identificador;
+
 
 a_condicao =
-    {ar_condicao} [cond]:a_expressao [entao]:a_expressao [senao]:a_expressao
+    {ar_condicao} [cond]:a_expressao [entao]:a_expressao [senao]:a_expressao;
+
+a_lambda =
+    {ar_lambda} a_lista_ids a_expressao a_lista_expr;
+
+a_chamada =
+    {ar_chamada} [nome]:identificador [exprs]:a_lista_expr;
+
+a_bloco_expressao =
+    {ar_bloco_expressao} a_declaracao_constante* a_expressao;
+
+a_declaracao_constante =
+    {ar_declaracao_constante} a_tipo identificador a_expressao;
+
+a_lista_expr =
+    {ar_lista_expr} a_expressao*;
+
+a_lista_ids =
+  {ar_lista_ids} identificador*;

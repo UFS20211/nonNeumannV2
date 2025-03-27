@@ -1,1 +1,4 @@
-funcao booleana aplicaOperador [ funcao booleana op[booleano | numero] | booleano x | numero y ] : [op[x | y] ].
+funcao booleana aplicaOperador [numero x | numero y] : [
+     lambda [x | y | z] : (x*y*z) [2 | 7 | 5]
+
+ ].
