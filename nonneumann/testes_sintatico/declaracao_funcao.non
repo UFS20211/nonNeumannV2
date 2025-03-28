@@ -1,4 +1,5 @@
-funcao booleana aplicaOperador [numero x | numero y] : [
-     lambda [x | y | z] : (x*y*z) [2 | 7 | 5]
-
+>> funcao booleana aplicaOperador [numero x | numero y | numero z] : [
+    x * (y + z)
  ].
+
+

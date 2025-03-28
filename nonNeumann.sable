@@ -77,7 +77,7 @@ programa { -> a_programa } =
     {dec_funcao} dec_funcao* {-> New a_programa.ar_programa([dec_funcao.a_dec_funcao])};
 
 dec_funcao { -> a_dec_funcao} =
-    {dec_funcao} identificador_funcao_main? funcao {-> New a_dec_funcao.ar_dec_funcao(funcao.a_funcao)};
+    {dec_funcao} [id]:identificador_funcao_main? funcao {-> New a_dec_funcao.ar_dec_funcao(id, funcao.a_funcao)};
 
 funcao { -> a_funcao} =
     {funcao} reservada_funcao [retorno]:tipo_retorno [nome]:identificador colchete_esquerdo [args]:parametros colchete_direito dois_pontos [parameter]:colchete_esquerdo [expr]:expressao [parameter2]:colchete_direito ponto_final
@@ -159,7 +159,7 @@ termo { -> a_expressao} =
    {-> New a_expressao.ar_arit_div_int(left.a_expressao, right.a_expressao)}
    |{fator} fator {-> fator.a_expressao};
 
-fator { -> a_expressao }=
+fator { -> a_expressao } =
     {parenteses} parentese_esquerdo [expr]:expressao parentese_direito { -> expr.a_expressao }
    |{numeros} numeros { -> numeros.a_expressao}
    |{logicos} logicos { -> logicos.a_expressao}
@@ -167,7 +167,7 @@ fator { -> a_expressao }=
    |{chamada} chamada {-> New a_expressao.ar_chamada(chamada.a_chamada)}
    |{lambda} lambda { -> New a_expressao.ar_lambda(lambda.a_lambda)}
    |{bloco_expressao} bloco_expressao { -> New a_expressao.ar_bloco_expressao(bloco_expressao.a_bloco_expressao)}
-   |{menos_exp} menos fator { -> New a_expressao.ar_menos_exp(menos, fator.a_expressao)};
+   |{menos_exp} menos fator { -> New a_expressao.ar_menos_exp(fator.a_expressao)};
 
 numeros { -> a_expressao } =
      {numero_inteiro} numero_inteiro { -> New a_expressao.ar_numero_inteiro(numero_inteiro)}
@@ -195,13 +195,15 @@ fecho_expressao { -> a_expressao } =
     {fecho_expressao} pipe [expr]:expressao {-> expr.a_expressao };
 
 lista_ids { -> a_lista_ids} =
-    {lista_ids} [prod]:prod_identificador [resto]:fecho_identificador*
-    { -> New a_lista_ids.ar_lista_ids([identificador, resto.a_lista_ids])}
+    {lista_ids} [prod]:producao_identificador [resto]:fecho_identificador*
+    { -> New a_lista_ids.ar_lista_ids([prod.a_identificador, resto.a_identificador])}
     |{vazio} { -> New a_lista_ids.ar_lista_ids([])};
 
+fecho_identificador { -> a_identificador } =
+  {fecho_identificador} pipe [id]:producao_identificador { -> id.a_identificador};
 
-fecho_identificador { -> a_lista_ids }  =
-  {fecho_identificador} pipe identificador { -> New a_lista_ids.ar_lista_ids([identificador])};
+producao_identificador {-> a_identificador} =
+    {pi} [id]:identificador {-> New a_identificador.ar_identificador(id)};
 
 bloco_expressao { -> a_bloco_expressao } =
     {bloco_expressao} colchete_esquerdo [decl_con]:declaracao_constante* [expr]:expressao colchete_direito
@@ -226,7 +228,7 @@ a_programa =
     {ar_programa} a_dec_funcao*;
 
 a_dec_funcao =
-    {ar_dec_funcao} a_funcao;
+    {ar_dec_funcao} identificador_funcao_main? a_funcao;
 
 a_funcao =
     {ar_funcao} [retorno]:a_tipo_retorno [nome]:identificador [args]:a_parametros [expr]:a_expressao;
@@ -260,7 +262,7 @@ a_expressao =
         {ar_condicao} a_condicao
       | {ar_chamada} a_chamada
       | {ar_lambda} a_lambda
-      | {ar_menos_exp} menos a_expressao
+      | {ar_menos_exp} a_expressao
       | {ar_bloco_expressao} a_bloco_expressao
       | {ar_logico_ou} [left]:a_expressao [right]:a_expressao
       | {ar_logico_e} [left]:a_expressao [right]:a_expressao
@@ -300,4 +302,7 @@ a_lista_expr =
     {ar_lista_expr} a_expressao*;
 
 a_lista_ids =
-  {ar_lista_ids} identificador*;
+  {ar_lista_ids} a_identificador*;
+
+a_identificador =
+   {ar_identificador} identificador;
